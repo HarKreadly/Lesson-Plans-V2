@@ -1,0 +1,6 @@
+{
+  "name": "Teacher Lesson Plans",
+  "description": "App for teachers to upload and organize lesson plans with Firebase Storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

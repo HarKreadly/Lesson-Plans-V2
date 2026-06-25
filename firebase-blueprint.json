@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "Teacher": {
+      "title": "Teacher",
+      "description": "Represents a teacher and their lesson plan status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "group": { "type": "string" },
+        "unit": { "type": "string" },
+        "lesson": { "type": "string" },
+        "hasUploaded": { "type": "boolean" },
+        "fileLink": { "type": "string", "nullable": true },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "version": { "type": "string" },
+              "url": { "type": "string" },
+              "name": { "type": "string" },
+              "uploadedAt": { "type": "number" }
+            },
+            "required": ["version", "url", "name", "uploadedAt"]
+          },
+          "nullable": true
+        },
+        "updatedAt": { "type": "number", "nullable": true }
+      },
+      "required": ["id", "name", "group", "unit", "lesson", "hasUploaded"]
+    }
+  },
+  "firestore": {
+    "teachers/{teacherId}": {
+      "schema": { "$ref": "#/entities/Teacher" },
+      "description": "Collection of all teachers"
+    }
+  }
+}
