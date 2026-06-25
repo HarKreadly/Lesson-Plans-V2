@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Users,
@@ -81,9 +81,12 @@ function GroupSelect({ value, onChange }) {
 export function AuthScreen() {
   const { googleSignIn, emailSignIn, emailSignUp, completeProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isSignupMode = new URLSearchParams(location.search).get("mode") === "signup";
 
   const [step, setStep] = useState("signin"); // "signin" | "profile"
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(isSignupMode);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -112,7 +115,18 @@ export function AuthScreen() {
       }
     } catch (err) {
       console.error("Google sign-in error:", err.code, err.message);
-      setError(`Sign-in failed: ${err.message}`);
+      if (err.code === "auth/operation-not-allowed") {
+        setError("Google sign-in is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.");
+      } else {
+        const codeMap = {
+          "auth/popup-closed-by-user": "Sign-in cancelled.",
+          "auth/popup-blocked": "Popup was blocked. Please allow popups for this site.",
+          "auth/cancelled-popup-request": "Sign-in cancelled.",
+          "auth/network-request-failed": "Network error. Check your connection.",
+          "auth/unauthorized-domain": "This domain is not authorised. Contact admin.",
+        };
+        setError(codeMap[err.code] || `Sign-in failed: ${err.message}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +155,17 @@ export function AuthScreen() {
       }
     } catch (err) {
       console.error("Email auth error:", err.code, err.message);
-      setError(err.message);
+      if (err.code === "auth/operation-not-allowed") {
+        setError("Email/Password authentication is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.");
+      } else if (err.code === "auth/invalid-credential") {
+        setError("Invalid email or password.");
+      } else if (err.code === "auth/email-already-in-use") {
+        setError("An account with this email already exists.");
+      } else if (err.code === "auth/weak-password") {
+        setError("Password should be at least 6 characters.");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }
